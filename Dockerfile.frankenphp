@@ -1,0 +1,91 @@
+FROM ghcr.io/shyim/wolfi-php/frankenphp:8.4 AS php-base
+
+RUN apk add --no-cache \
+    curl \
+    php-frankenphp-8.4-intl \
+    php-frankenphp-8.4-pdo_sqlite \
+    php-frankenphp-8.4-opcache \
+    php-frankenphp-8.4-zip \
+    php-frankenphp-8.4-pcntl \
+    php-frankenphp-8.4-fileinfo \
+    php-frankenphp-8.4-dom \
+    php-frankenphp-8.4-simplexml \
+    php-frankenphp-8.4-phar \
+    php-frankenphp-8.4-mbstring \
+    php-frankenphp-8.4-ctype \
+    php-frankenphp-8.4-openssl \
+    php-frankenphp-8.4-curl \
+    php-frankenphp-8.4-pdo \
+    php-frankenphp-8.4-iconv \
+    php-frankenphp-8.4-xmlreader
+
+WORKDIR /app
+
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM php-base AS build
+
+ENV APP_ENV=production \
+    APP_DEBUG=false
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --prefer-dist \
+    --optimize-autoloader
+
+COPY . .
+
+COPY --from=frontend /app/public/build /app/public/build
+
+RUN composer dump-autoload --optimize --no-dev
+
+FROM php-base AS production
+
+RUN addgroup -g 82 -S www-data \
+ && adduser -D -G www-data -u 82 -S www-data \
+ && mkdir -p /data \
+ && chown www-data:www-data /data
+
+WORKDIR /app
+
+COPY --from=build --chown=www-data:www-data /app /app
+
+COPY --chmod=644 docker/Caddyfile /etc/caddy/Caddyfile
+
+COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
+
+USER www-data
+
+ENV APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_CHANNEL=stderr \
+    DB_CONNECTION=sqlite \
+    DB_DATABASE=/data/database.sqlite \
+    OCTANE_WORKERS=2
+
+VOLUME ["/data"]
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS http://localhost:8080/up || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["php", "artisan", "octane:start", \
+     "--server=frankenphp", \
+     "--host=0.0.0.0", \
+     "--port=8080", \
+     "--caddyfile=/etc/caddy/Caddyfile"]

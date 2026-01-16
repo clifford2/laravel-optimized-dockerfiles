@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+cd /var/www/html
+
+mkdir -p /data
+chown www-data:www-data /data 2>/dev/null || true
+
+if [ "${DB_CONNECTION:-}" = "sqlite" ] && [ ! -f "${DB_DATABASE:-/data/database.sqlite}" ]; then
+    mkdir -p "$(dirname "${DB_DATABASE:-/data/database.sqlite}")"
+    touch "${DB_DATABASE:-/data/database.sqlite}"
+    chown www-data:www-data "${DB_DATABASE:-/data/database.sqlite}" 2>/dev/null || true
+    echo "Created SQLite database"
+fi
+
+echo "Running migrations..."
+php artisan migrate --force
+
+echo "Optimizing..."
+php artisan optimize
+
+echo "Creating storage link..."
+php artisan storage:link 2>/dev/null || true
+
+echo "Starting PHP-FPM..."
+exec /usr/sbin/php-fpm --nodaemonize
