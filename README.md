@@ -1,42 +1,48 @@
 # Laravel Dockerfiles
 
-Optimized Docker images for Laravel applications. Two variants designed for different deployment scenarios.
+Optimized and secure Docker images for Laravel applications with SQLite. Two variants designed for different deployment scenarios, both built on Wolfi Linux for enterprise-grade security.
 
 ## Overview
 
-This repository provides production-ready Docker images built on Wolfi Linux for maximum security and minimal footprint.
+This repository provides production-ready Docker images built on **Wolfi Linux**, an independent Linux distribution designed from the ground up for security. These images deliver maximum performance without compromising on safety.
 
 | Variant | Use Case | Image Size | Idle Memory |
 |---------|----------|------------|-------------|
 | **PHP-FPM** | Lightweight homelab deployments | ~180 MB | ~17 MB |
 | **FrankenPHP** | High-performance production | ~230 MB | ~200 MB |
 
+### Core Design Goals
+
+**Performance**
+- Multi-stage builds for minimal image size
+- Pre-configured OPcache and worker optimization
+- Frontend assets compiled during build time
+
+**Security**
+- Built on Wolfi Linux
+- Minimal attack surface with stripped-down packages
+
 ## Variants
 
 ### PHP-FPM
 
-Lightweight Alpine-based image with PHP-FPM and Nginx. Ideal for homelab environments where resources are constrained and memory usage matters more than maximum performance.
+Lightweight image with PHP-FPM and Nginx. Ideal for homelab environments where resources are constrained and memory efficiency matters more than maximum performance.
+
+**Key Features:**
+- Multi-stage build with frontend compilation
+- Pre-configured PHP-FPM pool settings
+- OPcache enabled for optimal performance
+- SQLite database support out of the box
+- Wolfi security foundation
 
 ### FrankenPHP
 
 Modern PHP application server built on Caddy. Designed for high-performance production deployments where request speed is critical. Uses Laravel Octane for persistent worker processes.
 
-
-## Quick Start
-
-### PHP-FPM
-
-```bash
-docker build -t myapp-fpm -f Dockerfile.fpm .
-docker run -p 8080:8080 -v $(pwd)/data:/data myapp-fpm
-```
-
-### FrankenPHP
-
-```bash
-docker build -t myapp-frankenphp -f Dockerfile.frankenphp .
-docker run -p 8080:8080 -v $(pwd)/data:/data myapp-frankenphp
-```
+**Key Features:**
+- Laravel Octane workers for persistent execution
+- Pre-warmed OPcache
+- Wolfi security foundation
 
 ## Configuration
 
@@ -66,7 +72,6 @@ Mount the following volumes for persistence:
 |------|---------|
 | `/data` | SQLite database storage |
 
-
 ## Performance Comparison
 
 ### Resource Usage
@@ -76,7 +81,7 @@ Mount the following volumes for persistence:
 | Image Size | ~180 MB | ~230 MB | +50 MB |
 | Idle Memory | ~17 MB | ~200 MB | +183 MB |
 | Startup Time | Fast | Moderate | - |
-| Worker Model | Process pool | Persistent workers | - |
+| Worker Model | On demand process pool | Persistent workers | - |
 | Best For | Homelab | Production | - |
 
 ### When to Use Each
@@ -84,56 +89,14 @@ Mount the following volumes for persistence:
 **Choose PHP-FPM when:**
 - Running on limited hardware (Raspberry Pi, NAS, old servers)
 - Memory efficiency is critical
-- Single application deployments
-- Quick scaling not required
 
 **Choose FrankenPHP when:**
-- Maximum request performance is required
 - High traffic applications
-- Modern PHP features (async, workers) are utilized
-- Automatic HTTPS is desired
-- Persistent connections are beneficial
-
-## Included Configuration
-
-### PHP-FPM
-- Nginx configuration for Laravel
-- PHP-FPM pool optimized for single app
-- OPcache settings for production
-- Entrypoint script for initialization
-
-### FrankenPHP
-- Caddyfile for Laravel Octane
-- Health check endpoint
-- Automatic HTTPS support
-- Entrypoint script for initialization
 
 ## Security
 
-Built on Wolfi Linux, an independent Linux distribution designed for security:
-- Minimal attack surface
-- Regular security updates
-- Chaotic engineering principles
-- Reproducible builds
+These images are built on **Wolfi Linux**, an independent Linux distribution designed specifically for security in cloud-native environments.
 
-## Requirements
-
-- Docker 20.10+
-- SQLite-compatible Laravel application
-- For multi-stage builds: Docker BuildKit enabled
-
-## Building
-
-```bash
-# Enable BuildKit
-export DOCKER_BUILDKIT=1
-
-# Build PHP-FPM variant
-docker build -t myapp-fpm -f Dockerfile.fpm .
-
-# Build FrankenPHP variant
-docker build -t myapp-frankenphp -f Dockerfile.frankenphp .
-```
 
 ## License
 
