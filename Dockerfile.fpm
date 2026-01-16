@@ -82,7 +82,8 @@ COPY docker/Procfile /etc/Procfile
 
 COPY --from=build --chown=www-data:www-data /app /var/www/html
 
-USER www-data
+# USER www-data
+USER 82
 
 EXPOSE 8080
 
