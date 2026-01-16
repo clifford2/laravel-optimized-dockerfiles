@@ -1,6 +1,6 @@
 # Laravel Dockerfiles
 
-Optimized and secure Docker images for Laravel applications with SQLite. Two variants designed for different deployment scenarios, both built on Wolfi Linux for enterprise-grade security.
+Optimized and secure Docker images for Laravel applications with SQLite. Two variants designed for different deployment scenarios, both built on [Wolfi PHP](https://github.com/shyim/wolfi-php) for enterprise-grade security.
 
 ## Overview
 
@@ -19,7 +19,7 @@ This repository provides production-ready Docker images built on **Wolfi Linux**
 - Frontend assets compiled during build time
 
 **Security**
-- Built on Wolfi Linux
+- Built on [Wolfi PHP](https://github.com/shyim/wolfi-php)
 - Minimal attack surface with stripped-down packages
 
 ## Variants
@@ -33,7 +33,7 @@ Lightweight image with PHP-FPM and Nginx. Ideal for homelab environments where r
 - Pre-configured PHP-FPM pool settings
 - OPcache enabled for optimal performance
 - SQLite database support out of the box
-- Wolfi security foundation
+- [Wolfi PHP](https://github.com/shyim/wolfi-php) security foundation
 
 ### FrankenPHP
 
@@ -42,7 +42,7 @@ Modern PHP application server built on Caddy. Designed for high-performance prod
 **Key Features:**
 - Laravel Octane workers for persistent execution
 - Pre-warmed OPcache
-- Wolfi security foundation
+- [Wolfi PHP](https://github.com/shyim/wolfi-php) security foundation
 
 ## Configuration
 
@@ -95,7 +95,7 @@ Mount the following volumes for persistence:
 
 ## Security
 
-These images are built on **Wolfi Linux**, an independent Linux distribution designed specifically for security in cloud-native environments.
+These images are built on [Wolfi Linux](https://github.com/shyim/wolfi-php), an independent Linux distribution designed specifically for security in cloud-native environments.
 
 
 ## License
